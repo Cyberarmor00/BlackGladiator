@@ -2,13 +2,14 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-AF_DCMotor motorright(3);//rechter Motor
-AF_DCMotor motorleft(4);//Linker Motor
+AF_DCMotor motorright(2);//rechter Motor
+AF_DCMotor motorleft(1);//Linker Motor
 int echo=7;
 int trigger=6;
 int x=0;
 int y=0;
 int i=0;
+int state=0;
 
 void setup() {
   pinMode(trigger, OUTPUT);
@@ -18,11 +19,13 @@ void setup() {
 }
 
 int Messung(){
+  digitalWrite(trigger,LOW);
+  delay(10);
   digitalWrite(trigger,HIGH);
   delay(10);
   digitalWrite(trigger, LOW);
   int time=pulseIn(echo,HIGH); //Zeitmessung von absenden mit Empfang des Signals
-  int Entfernung=(time/2)*0.03432;
+  int Entfernung=(time*0.034)/2;
   return Entfernung;
 }
 
@@ -61,14 +64,20 @@ int kurvelinks(int y){
 }
 
 void loop() {
-  vorwaerts(100);
-  if (Messung<20){
-    motorleft.run(RELEASE);
-    motorright.run(RELEASE);
-    kurverechts(1500);
-  for (int i=0; i=3; i++){
+  if (state==1){
+    for (int i=0; i=3; i++){
       vorwaerts(100);
       kurverechts(1000);
     }
   }
+  else if (state==0){
+    vorwaerts(100);
+    if (Messung()<20){
+      motorright.run(RELEASE);
+      motorleft.run(RELEASE);
+      kurvelinks(750);
+    }
+  }
+
 }
+
